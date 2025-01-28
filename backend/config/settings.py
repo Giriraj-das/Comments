@@ -139,4 +139,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+CAPTCHA_FONT_SIZE = 30
+CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
+CAPTCHA_TIMEOUT = 5  # minutes
+
 CORS_ALLOW_ALL_ORIGINS = True

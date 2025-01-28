@@ -8,6 +8,13 @@ from .models import Comment
 from .serializers import CommentSerializer
 
 
+class CaptchaAPIView(APIView):
+    def get(self, request):
+        new_captcha = CaptchaStore.generate_key()
+        captcha_url = captcha_image_url(new_captcha)
+        return Response({'captcha_key': new_captcha, 'captcha_image': captcha_url})
+
+
 class CommentAPIView(APIView):
     def get(self, request):
         sort_by = request.GET.get('sort_by', 'created_at')
@@ -25,6 +32,22 @@ class CommentAPIView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
+        captcha_key = request.data.get("captcha_key")
+        captcha_value = request.data.get("captcha")
+
+        # Check CAPTCHA
+        if not captcha_key or not captcha_value:
+            return Response({"error": "CAPTCHA is required"}, status=400)
+        try:
+            captcha = CaptchaStore.objects.get(hashkey=captcha_key)
+            if captcha.expiration < now():
+                return Response({"error": "CAPTCHA expired"}, status=400)
+            if captcha.response != captcha_value.lower():
+                return Response({"error": "Invalid CAPTCHA"}, status=400)
+        except CaptchaStore.DoesNotExist:
+            return Response({"error": "Invalid CAPTCHA key"}, status=400)
+
+        # If CAPTCHA valid, save a comment
         serializer = CommentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
