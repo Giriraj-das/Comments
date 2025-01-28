@@ -1,0 +1,17 @@
+header h1 {
+    display: flex;
+    margin: 0;
+    align-items: center;
+    height: 10vh;
+    color: #1ea83a;
+    background: #afe3b9;
+    justify-content: center;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}

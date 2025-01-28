@@ -1,0 +1,36 @@
+.comment-list-container {
+  padding: 20px;
+  max-width: 50%;
+  margin: 0 auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.comment-header {
+  display: flex;
+  background: #e1e3e6;
+  align-items: center;
+  gap: 10px; /* space between elements */
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #939596;
+  margin: 5px;
+  font-size: 0.5em;
+}
+
+.username {
+  font-weight: bold;
+}
+
+.comment-date {
+  font-size: 0.85em;
+  color: gray;
+}
+
+.comment-body {
+  font-size: 1em;
+  color: #333;
+}
