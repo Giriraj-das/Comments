@@ -12,6 +12,8 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
   const [captchaError, setCaptchaError] = useState("");
   const [captchaImage, setCaptchaImage] = useState(null);
   const [avatar, setAvatar] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const textAreaRef = useRef(null);
 
   const fetchCaptcha = async () => {
@@ -42,6 +44,9 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
       }
       formData.append("avatar", avatar);
     }
+    if (selectedFile) {
+      formData.append("file", selectedFile);
+    }
 
     try {
       const response = await axios.post("http://localhost:8000/comments/", formData, {
@@ -54,14 +59,98 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
       setText("");
       setCaptcha("");
       setAvatar(null);
+      setSelectedFile(null);
+      setPreviewUrl(null);
       setCaptchaError("");
       fetchCaptcha();
       if (onCommentAdded) onCommentAdded(response.data);
     } catch (error) {
       const serverError = error.response?.data?.error;
-      console.log(serverError);
+      console.log("Error submitting comment", error.response?.data || error);
       setCaptchaError(serverError);
     }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const isImage = ["image/jpeg", "image/png", "image/gif"].includes(file.type);
+    const isTextFile = file.type === "text/plain";
+
+    if (isImage) {
+      resizeImage(file, 320, 240, (resizedFile, previewUrl) => {
+        setSelectedFile(resizedFile);
+        setPreviewUrl(previewUrl);
+      });
+    } else if (isTextFile) {
+      if (file.size > 100 * 1024) {
+        alert("Text file size must not exceed 100KB.");
+        return;
+      }
+      setSelectedFile(file);
+      setPreviewUrl(null);
+    } else {
+      alert("Only JPG, PNG, GIF, or TXT files are allowed.");
+    }
+  };
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const isImage = ["image/jpeg", "image/png", "image/gif"].includes(file.type);
+    if (!isImage) {
+      alert("Only JPG, PNG, and GIF files are allowed for avatars.");
+      return;
+    }
+
+    resizeImage(file, 100, 100, (resizedFile) => {
+      setAvatar(resizedFile);
+    });
+  };
+
+  const resizeImage = (file, maxWidth, maxHeight, callback) => {
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        let width = img.width;
+        let height = img.height;
+        const scaleFactor = Math.min(maxWidth / width, maxHeight / height, 1);
+        width *= scaleFactor;
+        height *= scaleFactor;
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob((blob) => {
+          callback(new File([blob], file.name, { type: file.type }), URL.createObjectURL(blob));
+        }, file.type);
+      };
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+    if (!allowedTypes.includes(file.type)) {
+      alert("Only JPG, PNG, and GIF files are allowed for avatars.");
+      return;
+    }
+
+    setAvatar(file);
   };
 
   const insertTag = (tag) => {
@@ -73,12 +162,12 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
   const afterText = text.slice(end); // Text after selection
 
   const newText = selectedText
-    ? `${beforeText}[${tag}]${selectedText}[/${tag}]${afterText}`
-    : `${beforeText}[${tag}][/${tag}]${afterText}`;
+    ? `${beforeText}<${tag}>${selectedText}</${tag}>${afterText}`
+    : `${beforeText}<${tag}></${tag}>${afterText}`;
 
   const cursorPosition = selectedText
-    ? start + `[${tag}]`.length + selectedText.length + `[/${tag}]`.length
-    : start + `[${tag}]`.length;
+    ? start + `<${tag}>`.length + selectedText.length + `</${tag}>`.length
+    : start + `<${tag}>`.length;
 
   setText(newText);
 
@@ -100,24 +189,34 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
           {replyingTo && (
             <div className="reply-to">
               <span>Reply to:</span>
-              <img src={replyingTo.avatar || "/default-avatar.png"} alt="Avatar" className="avatar-small" />
+              <img src={replyingTo.avatar ? `http://localhost:8000/${replyingTo.avatar}` : "http://localhost:8000/uploads/avatars/default_avatar.jpeg"} alt="Avatar" className="avatar-small" />
               <span className="username">{replyingTo.username || "Anonymous"}</span>
             </div>
           )}
-          <div className="tag-buttons">
+          <div className="toolbar tag-buttons">
             <button type="button" onClick={() => insertTag("i")}>Italic</button>
             <button type="button" onClick={() => insertTag("strong")}>Bold</button>
             <button type="button" onClick={() => insertTag("code")}>Code</button>
             <button type="button" onClick={() => insertTag("a")}>Link</button>
+            <label className="upload-button">
+              File
+              <input type="file" accept=".jpg,.jpeg,.png,.gif,.txt" onChange={handleFileChange} />
+            </label>
           </div>
 
           <textarea id="text" value={text} onChange={(e) => setText(e.target.value)} required ref={textAreaRef} />
+
           <div className="form-actions">
             <button type="submit">Submit Comment</button>
             <button type="button" onClick={onClose}>Cancel</button>
           </div>
-
         </div>
+
+        {previewUrl && (
+          <div className="file-preview">
+            <img src={previewUrl} alt="Preview" />
+          </div>
+        )}
 
         <div className="reply-form-fields">
           <div className="form-group">
@@ -143,7 +242,7 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
           </div>
           <div className="form-group">
             <label htmlFor="avatar">Upload Avatar (optional):</label>
-            <input type="file" id="avatar" onChange={(e) => setAvatar(e.target.files[0])} />
+            <input type="file" id="avatar" accept=".jpg,.jpeg,.png,.gif" onChange={handleAvatarChange} />
           </div>
         </div>
       </form>
