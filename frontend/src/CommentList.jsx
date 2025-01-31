@@ -20,7 +20,7 @@ function CommentList() {
         });
         setComments(response.data);
       } catch (error) {
-        console.error("Error fetching comments:", error);
+        console.error("Error getting comments:", error);
       }
     };
 
@@ -55,7 +55,7 @@ function CommentList() {
     return comments.map((comment) => (
       <div key={comment.id} className="comment-item" style={{ marginLeft: `${depth * 20}px` }}>
         <div className="comment-header">
-          <img src={comment.avatar_url || "/default-avatar.png"} alt="Avatar" className="avatar" />
+          <img src={comment.avatar ? `http://localhost:8000${comment.avatar}` : "http://localhost:8000/uploads/avatars/default_avatar.jpeg"} alt="Avatar" className="avatar" />
           <span className="username">{comment.username || "Anonymous"}</span>
           <span className="comment-date">{formatDate(comment.created_at)}</span>
         </div>
@@ -85,7 +85,7 @@ function CommentList() {
               setActiveCommentId(null);
             }}
             onClose={() => setActiveCommentId(null)}
-            replyingTo={{ avatar: comment.avatar_url, username: comment.username }}
+            replyingTo={{ avatar: comment.avatar, username: comment.username }}
           />
         )}
         {comment.replies && comment.replies.length > 0 && renderComments(comment.replies, depth + 1)}
