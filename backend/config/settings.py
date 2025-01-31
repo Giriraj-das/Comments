@@ -139,6 +139,15 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+MEDIA_URL = '/uploads/'
+MEDIA_ROOT = BASE_DIR / 'uploads'
+
+DEFAULT_PARSER_CLASSES = [
+    'rest_framework.parsers.JSONParser',
+    'rest_framework.parsers.FormParser',
+    'rest_framework.parsers.MultiPartParser',
+]
+
 CAPTCHA_FONT_SIZE = 30
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 CAPTCHA_TIMEOUT = 5  # minutes
