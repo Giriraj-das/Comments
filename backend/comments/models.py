@@ -1,5 +1,4 @@
 from django.db import models
-from .validators import AvatarValidator, FileValidator
 
 
 class Comment(models.Model):
