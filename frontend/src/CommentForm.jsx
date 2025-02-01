@@ -139,20 +139,6 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
     reader.readAsDataURL(file);
   };
 
-
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
-    if (!allowedTypes.includes(file.type)) {
-      alert("Only JPG, PNG, and GIF files are allowed for avatars.");
-      return;
-    }
-
-    setAvatar(file);
-  };
-
   const insertTag = (tag) => {
   const textarea = document.getElementById("text"); // Get textarea
   const start = textarea.selectionStart; // Cursor start position
