@@ -32,20 +32,20 @@ class CommentAPIView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        captcha_key = request.data.get("captcha_key")
-        captcha_value = request.data.get("captcha")
+        captcha_key = request.data.get('captcha_key')
+        captcha_value = request.data.get('captcha')
 
         # Check CAPTCHA
         if not captcha_key or not captcha_value:
-            return Response({"error": "CAPTCHA is required"}, status=400)
+            return Response({'error': 'CAPTCHA is required'}, status=400)
         try:
             captcha = CaptchaStore.objects.get(hashkey=captcha_key)
             if captcha.expiration < now():
-                return Response({"error": "CAPTCHA expired"}, status=400)
+                return Response({'error': 'CAPTCHA expired'}, status=400)
             if captcha.response != captcha_value.lower():
-                return Response({"error": "Invalid CAPTCHA"}, status=400)
+                return Response({'error': 'Invalid CAPTCHA'}, status=400)
         except CaptchaStore.DoesNotExist:
-            return Response({"error": "Invalid CAPTCHA key"}, status=400)
+            return Response({'error': 'Invalid CAPTCHA key'}, status=400)
 
         # If CAPTCHA valid, save a comment
         serializer = CommentSerializer(data=request.data)

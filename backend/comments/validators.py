@@ -32,7 +32,7 @@ class BaseFileValidator:
         try:
             img = Image.open(image)
             if img.width > self.MAX_IMAGE_WIDTH or img.height > self.MAX_IMAGE_HEIGHT:
-                img.thumbnail((self.MAX_IMAGE_WIDTH, self.MAX_IMAGE_HEIGHT))  # Пропорциональное уменьшение
+                img.thumbnail((self.MAX_IMAGE_WIDTH, self.MAX_IMAGE_HEIGHT))  # Proportional reduction
                 return self._save_resized_image(img, image)
 
         except Exception as e:
