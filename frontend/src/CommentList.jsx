@@ -8,6 +8,7 @@ function CommentList() {
   const [sortBy, setSortBy] = useState("created_at");
   const [order, setOrder] = useState("desc");
   const [activeCommentId, setActiveCommentId] = useState(null);
+  const [activeRootComment, setActiveRootComment] = useState(false);
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -38,8 +39,8 @@ function CommentList() {
 
   const formatDate = (dateString) => {
     const options = {
+      month: "short",
       year: "numeric",
-      month: "long",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
@@ -47,8 +48,29 @@ function CommentList() {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  const toggleReplyForm = (commentId) => {
-    setActiveCommentId(activeCommentId === commentId ? null : commentId);
+  const toggleCommentForm = (commentId = null) => {
+    if (activeCommentId === commentId) {
+      setActiveCommentId(null);
+    } else {
+      setActiveCommentId(commentId);
+      setActiveRootComment(false);
+    }
+  };
+
+  const toggleRootCommentForm = () => {
+    setActiveRootComment(!activeRootComment);
+    setActiveCommentId(null);
+  };
+
+  const addReplyToComments = (comments, parentId, newComment) => {
+    return comments.map((comment) => {
+      if (comment.id === parentId) {
+        return { ...comment, replies: [...(comment.replies || []), newComment] };
+      } else if (comment.replies) {
+        return { ...comment, replies: addReplyToComments([...comment.replies], parentId, newComment) };
+      }
+      return comment;
+    });
   };
 
   const renderComments = (comments, depth = 0) => {
@@ -63,7 +85,7 @@ function CommentList() {
           <p>{comment.text}</p>
         </div>
         <div className="comment-footer">
-          <button className="reply-button" onClick={() => toggleReplyForm(comment.id)}>
+          <button className="reply-button" onClick={() => toggleCommentForm(comment.id)}>
             Reply
           </button>
         </div>
@@ -71,16 +93,6 @@ function CommentList() {
           <CommentForm
             parentId={comment.id}
             onCommentAdded={(newComment) => {
-              function addReplyToComments(comments, parentId, newComment) {
-                return comments.map((comment) => {
-                  if (comment.id === parentId) {
-                    return { ...comment, replies: [...(comment.replies || []), newComment] };
-                  } else if (comment.replies) {
-                    return { ...comment, replies: addReplyToComments(comment.replies, parentId, newComment) };
-                  }
-                  return comment;
-                });
-              };
               setComments((prevComments) => addReplyToComments(prevComments, comment.id, newComment));
               setActiveCommentId(null);
             }}
@@ -110,6 +122,22 @@ function CommentList() {
       <div className="comment-list-container">
         {comments.length === 0 ? <p>No comments yet!</p> : renderComments(comments)}
       </div>
+
+      <button className="add-root-comment-button" onClick={() => toggleRootCommentForm(null)}>
+        {activeRootComment ? "Cancel" : "Add Comment"}
+      </button>
+
+      {activeRootComment && (
+        <CommentForm
+          parentId={null}
+          onCommentAdded={(newComment) => {
+            setComments((prevComments) => [newComment, ...prevComments]);
+            setActiveRootComment(false);
+          }}
+          onClose={() => setActiveRootComment(false)}
+        />
+      )}
+
     </div>
   );
 }
