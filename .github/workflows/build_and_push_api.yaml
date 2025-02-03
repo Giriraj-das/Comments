@@ -46,8 +46,8 @@ jobs:
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
-          envsubst '$DOCKERHUB_USERNAME' < deploy/docker-compose.yaml > deploy/tmp.docker-compose.yaml
-          mv deploy/tmp.docker-compose.yaml deploy/docker-compose.yaml
+          envsubst '$DOCKERHUB_USERNAME' < deploy/docker-compose.yml > deploy/tmp.docker-compose.yml
+          mv deploy/tmp.docker-compose.yml deploy/docker-compose.yml
       - name: Copy on server
         uses: appleboy/scp-action@master
         with:
