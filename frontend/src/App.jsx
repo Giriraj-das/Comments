@@ -1,5 +1,5 @@
 import React from 'react';
-import CommentList from './CommentList.jsx';
+import CommentList from './components/CommentList.jsx';
 import './App.css';
 
 

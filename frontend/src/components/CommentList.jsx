@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect} from "react";
 import axios from "axios";
 import CommentForm from "./CommentForm.jsx";
+import ReplyButton from "./ReplyButton/ReplyButton.jsx";
 import "./CommentList.css";
 
 function CommentList() {
@@ -10,10 +11,12 @@ function CommentList() {
   const [activeCommentId, setActiveCommentId] = useState(null);
   const [activeRootComment, setActiveRootComment] = useState(false);
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/comments/", {
+        const response = await axios.get(`${apiUrl}/comments/`, {
           params: {
             sort_by: sortBy,
             order: order,
@@ -77,7 +80,7 @@ function CommentList() {
     return comments.map((comment) => (
       <div key={comment.id} className="comment-item" style={{ marginLeft: `${depth * 20}px` }}>
         <div className="comment-header">
-          <img src={comment.avatar ? `http://localhost:8000${comment.avatar}` : "http://localhost:8000/uploads/avatars/default_avatar.jpeg"} alt="Avatar" className="avatar" />
+          <img src={comment.avatar ? `${apiUrl}${comment.avatar}` : `${apiUrl}/uploads/avatars/default_avatar.jpeg`} alt="Avatar" className="avatar" />
           <span className="username">{comment.username || "Anonymous"}</span>
           <span className="comment-date">{formatDate(comment.created_at)}</span>
         </div>
@@ -85,9 +88,9 @@ function CommentList() {
           <p>{comment.text}</p>
         </div>
         <div className="comment-footer">
-          <button className="reply-button" onClick={() => toggleCommentForm(comment.id)}>
+          <ReplyButton onClick={() => toggleCommentForm(comment.id)}>
             Reply
-          </button>
+          </ReplyButton>
         </div>
         {activeCommentId === comment.id && (
           <CommentForm
@@ -123,9 +126,11 @@ function CommentList() {
         {comments.length === 0 ? <p>No comments yet!</p> : renderComments(comments)}
       </div>
 
-      <button className="add-root-comment-button" onClick={() => toggleRootCommentForm(null)}>
-        {activeRootComment ? "Cancel" : "Add Comment"}
-      </button>
+      <div className="add-root-comment">
+        <ReplyButton onClick={() => toggleRootCommentForm(null)}>
+          {activeRootComment ? "Cancel" : "Add Comment"}
+        </ReplyButton>
+      </div>
 
       {activeRootComment && (
         <CommentForm
