@@ -9,7 +9,12 @@
   display: flex;
   background: #e1e3e6;
   align-items: center;
-  gap: 10px; /* space between elements */
+  gap: 10px;
+}
+
+.comment-footer {
+  display: flex;
+  justify-content: right;
 }
 
 .avatar {
@@ -33,4 +38,10 @@
 .comment-body {
   font-size: 1em;
   color: #333;
+}
+
+.add-root-comment {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
 }
