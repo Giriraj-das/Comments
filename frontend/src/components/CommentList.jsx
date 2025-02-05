@@ -77,7 +77,7 @@ function CommentList() {
   };
 
   const renderComments = (comments, depth = 0) => {
-    return comments.map((comment) => (
+    return Array.isArray(comments) && comments.length > 0 ? comments.map((comment) => (
       <div key={comment.id} className="comment-item" style={{ marginLeft: `${depth * 20}px` }}>
         <div className="comment-header">
           <img src={comment.avatar ? `${apiUrl}${comment.avatar}` : `${apiUrl}/uploads/avatars/default_avatar.jpeg`} alt="Avatar" className="avatar" />
