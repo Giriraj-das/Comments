@@ -77,7 +77,11 @@ function CommentList() {
   };
 
   const renderComments = (comments, depth = 0) => {
-    return Array.isArray(comments) && comments.length > 0 ? comments.map((comment) => (
+    if (!Array.isArray(comments) || comments.length === 0) {
+      return null;
+    }
+
+    return comments.map((comment) => (
       <div key={comment.id} className="comment-item" style={{ marginLeft: `${depth * 20}px` }}>
         <div className="comment-header">
           <img src={comment.avatar ? `${apiUrl}${comment.avatar}` : `${apiUrl}/uploads/avatars/default_avatar.jpeg`} alt="Avatar" className="avatar" />
@@ -103,7 +107,7 @@ function CommentList() {
             replyingTo={{ avatar: comment.avatar, username: comment.username }}
           />
         )}
-        {comment.replies && comment.replies.length > 0 && renderComments(comment.replies, depth + 1)}
+        {Array.isArray(comment.replies) && comment.replies.length > 0 && renderComments(comment.replies, depth + 1)}
       </div>
     ));
   };
