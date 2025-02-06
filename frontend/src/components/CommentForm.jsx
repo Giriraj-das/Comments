@@ -207,7 +207,7 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
           <div className="form-group">
             <label htmlFor="captcha">CAPTCHA:</label>
             <div className="captcha-container">
-              {captchaImage && (<img src={`${apiUrl}${captchaImage}`} alt="captcha" />)}
+              {captchaImage && (<img src={`${apiUrl}/captcha${captchaImage}`} alt="captcha" />)}
               {captchaError && (<p className="error-message">{captchaError}</p>)}
               <input type="text" id="captcha" value={captcha} onChange={(e) => setCaptcha(e.target.value)} required />
               <button type="button" onClick={fetchCaptcha}>Refresh CAPTCHA</button>
