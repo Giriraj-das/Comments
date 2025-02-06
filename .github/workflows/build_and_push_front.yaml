@@ -16,6 +16,8 @@ jobs:
         with:
           vault_key: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
           command: "ansible-vault decrypt frontend/.env.production"
+      - name: Set rights
+        run: sudo chmod 755 frontend/.env.production
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
