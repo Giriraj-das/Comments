@@ -1,24 +1,28 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { validateURL, resizeImage } from "./utils.js";
 import "./CommentForm.css";
 
 function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [homepage, setHomepage] = useState("");
+  const [homepageError, setHomepageError] = useState("");
   const [text, setText] = useState("");
   const [captcha, setCaptcha] = useState("");
   const [captchaKey, setCaptchaKey] = useState("");
   const [captchaError, setCaptchaError] = useState("");
   const [captchaImage, setCaptchaImage] = useState(null);
   const [avatar, setAvatar] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const textAreaRef = useRef(null);
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   const fetchCaptcha = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/captcha/");
+      const response = await axios.get(`${apiUrl}/captcha/`);
       setCaptchaImage(response.data.captcha_image);
       setCaptchaKey(response.data.captcha_key);
     } catch (error) {
@@ -32,11 +36,11 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
     const formData = new FormData();
     formData.append("username", name);
     formData.append("email", email);
-    formData.append("homepage", homepage);
+    formData.append("home_page", homepage);
     formData.append("text", text);
     formData.append("captcha", captcha);
     formData.append("captcha_key", captchaKey);
-    formData.append("parent", parentId);
+    formData.append("parent", parentId !== null ? parentId : "");
     if (avatar) {
       if (!["image/png", "image/jpeg", "image/jpg"].includes(avatar.type)) {
         alert("Only PNG, JPG, and JPEG files are allowed for avatars.");
@@ -44,12 +48,12 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
       }
       formData.append("avatar", avatar);
     }
-    if (selectedFile) {
-      formData.append("file", selectedFile);
+    if (file) {
+      formData.append("file", file);
     }
 
     try {
-      const response = await axios.post("http://localhost:8000/comments/", formData, {
+      const response = await axios.post(`${apiUrl}/comments/`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       console.log("Comment submitted:", response.data);
@@ -59,7 +63,7 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
       setText("");
       setCaptcha("");
       setAvatar(null);
-      setSelectedFile(null);
+      setFile(null);
       setPreviewUrl(null);
       setCaptchaError("");
       fetchCaptcha();
@@ -68,6 +72,17 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
       const serverError = error.response?.data?.error;
       console.log("Error submitting comment", error.response?.data || error);
       setCaptchaError(serverError);
+    }
+  };
+
+  const handleHomepageChange = (e) => {
+    const value = e.target.value;
+    setHomepage(value);
+
+    if (!validateURL(value)) {
+      setHomepageError("Enter a valid URL (e.g., https://example.com)");
+    } else {
+      setHomepageError("");
     }
   };
 
@@ -80,7 +95,7 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
 
     if (isImage) {
       resizeImage(file, 320, 240, (resizedFile, previewUrl) => {
-        setSelectedFile(resizedFile);
+        setFile(resizedFile);
         setPreviewUrl(previewUrl);
       });
     } else if (isTextFile) {
@@ -88,7 +103,7 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
         alert("Text file size must not exceed 100KB.");
         return;
       }
-      setSelectedFile(file);
+      setFile(file);
       setPreviewUrl(null);
     } else {
       alert("Only JPG, PNG, GIF, or TXT files are allowed.");
@@ -110,59 +125,30 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
     });
   };
 
-  const resizeImage = (file, maxWidth, maxHeight, callback) => {
-    const img = new Image();
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-      img.src = event.target.result;
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-
-        let width = img.width;
-        let height = img.height;
-        const scaleFactor = Math.min(maxWidth / width, maxHeight / height, 1);
-        width *= scaleFactor;
-        height *= scaleFactor;
-
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob((blob) => {
-          callback(new File([blob], file.name, { type: file.type }), URL.createObjectURL(blob));
-        }, file.type);
-      };
-    };
-
-    reader.readAsDataURL(file);
-  };
-
   const insertTag = (tag) => {
-  const textarea = document.getElementById("text"); // Get textarea
-  const start = textarea.selectionStart; // Cursor start position
-  const end = textarea.selectionEnd; // Cursor end position
-  const selectedText = text.slice(start, end); // Selected text
-  const beforeText = text.slice(0, start); // Text before selection
-  const afterText = text.slice(end); // Text after selection
+    const textarea = document.getElementById("text"); // Get textarea
+    const start = textarea.selectionStart; // Cursor start position
+    const end = textarea.selectionEnd; // Cursor end position
+    const selectedText = text.slice(start, end); // Selected text
+    const beforeText = text.slice(0, start); // Text before selection
+    const afterText = text.slice(end); // Text after selection
 
-  const newText = selectedText
-    ? `${beforeText}<${tag}>${selectedText}</${tag}>${afterText}`
-    : `${beforeText}<${tag}></${tag}>${afterText}`;
+    const newText = selectedText
+      ? `${beforeText}<${tag}>${selectedText}</${tag}>${afterText}`
+      : `${beforeText}<${tag}></${tag}>${afterText}`;
 
-  const cursorPosition = selectedText
-    ? start + `<${tag}>`.length + selectedText.length + `</${tag}>`.length
-    : start + `<${tag}>`.length;
+    const cursorPosition = selectedText
+      ? start + `<${tag}>`.length + selectedText.length + `</${tag}>`.length
+      : start + `<${tag}>`.length;
 
-  setText(newText);
+    setText(newText);
 
-  // Set cursor to the new position
-  setTimeout(() => {
-    textarea.focus();  // Return focus to textarea
-    textarea.setSelectionRange(cursorPosition, cursorPosition);
-  }, 0);
-};
+    // Set cursor to the new position
+    setTimeout(() => {
+      textarea.focus();  // Return focus to textarea
+      textarea.setSelectionRange(cursorPosition, cursorPosition);
+    }, 0);
+  };
 
   useEffect(() => {
     fetchCaptcha();
@@ -175,7 +161,7 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
           {replyingTo && (
             <div className="reply-to">
               <span>Reply to:</span>
-              <img src={replyingTo.avatar ? `http://localhost:8000/${replyingTo.avatar}` : "http://localhost:8000/uploads/avatars/default_avatar.jpeg"} alt="Avatar" className="avatar-small" />
+              <img src={replyingTo.avatar ? `${apiUrl}/${replyingTo.avatar}` : `${apiUrl}/uploads/avatars/default_avatar.jpeg`} alt="Avatar" className="avatar-small" />
               <span className="username">{replyingTo.username || "Anonymous"}</span>
             </div>
           )}
@@ -215,12 +201,13 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
           </div>
           <div className="form-group">
             <label htmlFor="homepage">Homepage (optional):</label>
-            <input type="url" id="homepage" value={homepage} onChange={(e) => setHomepage(e.target.value)} />
+            <input type="url" id="homepage" value={homepage} onChange={handleHomepageChange} />
+            {homepageError && (<p className="error-message">{homepageError}</p>)}
           </div>
           <div className="form-group">
             <label htmlFor="captcha">CAPTCHA:</label>
             <div className="captcha-container">
-              {captchaImage && (<img src={`http://localhost:8000${captchaImage}`} alt="captcha" />)}
+              {captchaImage && (<img src={`${apiUrl}${captchaImage}`} alt="captcha" />)}
               {captchaError && (<p className="error-message">{captchaError}</p>)}
               <input type="text" id="captcha" value={captcha} onChange={(e) => setCaptcha(e.target.value)} required />
               <button type="button" onClick={fetchCaptcha}>Refresh CAPTCHA</button>
