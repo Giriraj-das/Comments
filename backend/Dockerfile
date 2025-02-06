@@ -18,6 +18,10 @@ RUN poetry install --no-root --no-dev
 
 COPY . .
 
+RUN mkdir -p /app/uploads && \
+    chown -R api:service /app/uploads && \
+    chmod -R 775 /app/uploads
+
 USER api
 
 ENTRYPOINT ["bash", "entrypoint.sh"]
