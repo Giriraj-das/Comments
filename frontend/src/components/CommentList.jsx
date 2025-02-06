@@ -16,7 +16,7 @@ function CommentList() {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const response = await axios.get(`${apiUrl}/comments/`, {
+        const response = await axios.get(`/api/comments/`, {
           params: {
             sort_by: sortBy,
             order: order,
