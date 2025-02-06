@@ -22,6 +22,8 @@ services:
         condition: service_healthy
     env_file:
       - .env
+    volumes:
+      - ./uploads:/app/uploads
 
   nginx:
     image: ${DOCKERHUB_USERNAME}/comments-front:latest
