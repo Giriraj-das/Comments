@@ -1,5 +1,6 @@
 import React, { useState, useEffect} from "react";
 import axios from "axios";
+import DOMPurify from "dompurify";
 import CommentForm from "./CommentForm.jsx";
 import ReplyButton from "./ReplyButton/ReplyButton.jsx";
 import "./CommentList.css";
@@ -77,6 +78,11 @@ function CommentList() {
     });
   };
 
+  const sanitizeText = (text) => {
+    const sanitized = DOMPurify.sanitize(text);
+    return sanitized.replace(/\n/g, "<br>");
+  };
+
   const renderComments = (comments, depth = 0) => {
     if (!Array.isArray(comments) || comments.length === 0) {
       return null;
@@ -90,7 +96,7 @@ function CommentList() {
           <span className="comment-date">{formatDate(comment.created_at)}</span>
         </div>
         <div className="comment-body">
-          <p>{comment.text}</p>
+          <p dangerouslySetInnerHTML={{ __html: sanitizeText(comment.text) }} />
         </div>
         <div className="comment-footer">
           <ReplyButton onClick={() => toggleCommentForm(comment.id)}>
