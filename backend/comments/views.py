@@ -3,9 +3,10 @@ import logging
 from captcha.helpers import captcha_image_url
 from captcha.models import CaptchaStore
 from django.utils.timezone import now
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from .models import Comment
 from .serializers import CommentSerializer
 
