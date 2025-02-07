@@ -1,3 +1,5 @@
+import logging
+
 from captcha.helpers import captcha_image_url
 from captcha.models import CaptchaStore
 from django.utils.timezone import now
@@ -6,6 +8,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Comment
 from .serializers import CommentSerializer
+
+logger = logging.getLogger('django')
 
 
 class CaptchaAPIView(APIView):
@@ -32,24 +36,34 @@ class CommentAPIView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        captcha_key = request.data.get('captcha_key')
-        captcha_value = request.data.get('captcha')
-
-        # Check CAPTCHA
-        if not captcha_key or not captcha_value:
-            return Response({'error': 'CAPTCHA is required'}, status=400)
         try:
-            captcha = CaptchaStore.objects.get(hashkey=captcha_key)
-            if captcha.expiration < now():
-                return Response({'error': 'CAPTCHA expired'}, status=400)
-            if captcha.response != captcha_value.lower():
-                return Response({'error': 'Invalid CAPTCHA'}, status=400)
-        except CaptchaStore.DoesNotExist:
-            return Response({'error': 'Invalid CAPTCHA key'}, status=400)
+            captcha_key = request.data.get('captcha_key')
+            captcha_value = request.data.get('captcha')
 
-        # If CAPTCHA valid, save a comment
-        serializer = CommentSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Check CAPTCHA
+            if not captcha_key or not captcha_value:
+                logger.error("CAPTCHA is missing in the request")
+                return Response({'error': 'CAPTCHA is required'}, status=400)
+            try:
+                captcha = CaptchaStore.objects.get(hashkey=captcha_key)
+                if captcha.expiration < now():
+                    logger.error(f"Expired CAPTCHA: {captcha_key}")
+                    return Response({'error': 'CAPTCHA expired'}, status=400)
+                if captcha.response != captcha_value.lower():
+                    logger.error(f"Invalid CAPTCHA: {captcha_key}")
+                    return Response({'error': 'Invalid CAPTCHA'}, status=400)
+            except CaptchaStore.DoesNotExist:
+                logger.error(f"Invalid CAPTCHA key: {captcha_key}")
+                return Response({'error': 'Invalid CAPTCHA key'}, status=400)
+
+            # If CAPTCHA valid, save a comment
+            serializer = CommentSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            logger.error(f"Invalid comment data: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.exception(f"Unexpected error in CommentAPIView: {e}")
+            return Response({'error': 'Internal Server Error'}, status=500)
