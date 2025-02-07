@@ -9,16 +9,12 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     POETRY_VIRTUALENVS_CREATE=false \
     POETRY_NO_INTERACTION=1
 
-RUN groupadd --system service && useradd --system -g service api
-
 RUN pip install "poetry==1.8.4"
 
 COPY pyproject.toml poetry.lock ./
 RUN poetry install --no-root --no-dev
 
 COPY . .
-
-USER api
 
 ENTRYPOINT ["bash", "entrypoint.sh"]
 
