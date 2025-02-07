@@ -10,7 +10,7 @@
 - You can use the following allowed HTML tags in your posts: `<a href=”” title=””> </a> <code> </code> <i> </i> <strong> </strong>`.
 - Validation of input data is performed on the server and client side.
 - A panel with buttons ([i], [strong], [code], [a]) is made for HTML tags.
-- The application is deployed on hosting at: [https://oradchenko.pp.ua](oradchenko.pp.ua)
+- The application is deployed on hosting at: [oradchenko.pp.ua](http://oradchenko.pp.ua/)
 
 #### How to use?
 
