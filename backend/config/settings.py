@@ -33,7 +33,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', default=False)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost"])
 
 
 # Application definition
@@ -130,40 +130,25 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-MEDIA_URL = '/uploads/'
-MEDIA_ROOT = BASE_DIR / 'uploads'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
-DEFAULT_PARSER_CLASSES = [
-    'rest_framework.parsers.JSONParser',
-    'rest_framework.parsers.FormParser',
-    'rest_framework.parsers.MultiPartParser',
-]
+REST_FRAMEWORK = {
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser',
+    ]
+}
 
 CAPTCHA_FONT_SIZE = 30
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 CAPTCHA_TIMEOUT = 5  # minutes
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    },
-}
