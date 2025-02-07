@@ -9,7 +9,7 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     POETRY_VIRTUALENVS_CREATE=false \
     POETRY_NO_INTERACTION=1
 
-RUN groupadd --system deploy && useradd --system -g deploy deploy
+RUN groupadd --system service && useradd --system -g service api
 
 RUN pip install "poetry==1.8.4"
 
@@ -18,10 +18,10 @@ RUN poetry install --no-root --no-dev
 
 COPY . .
 
-USER deploy
+USER api
 
 ENTRYPOINT ["bash", "entrypoint.sh"]
 
 EXPOSE 8000
 
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
