@@ -12,3 +12,4 @@ gunicorn = "^23.0.0"
 
 [tool.poetry.group.dev.dependencies]
 ansible-vault-win = "^1.0.0"
+django-cors-headers = "^4.7.0"
