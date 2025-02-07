@@ -19,6 +19,7 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
   const textAreaRef = useRef(null);
 
   const apiUrl = import.meta.env.VITE_API_URL;
+  const media = import.meta.env.VITE_MEDIA;
 
   const fetchCaptcha = async () => {
     try {
@@ -161,7 +162,7 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
           {replyingTo && (
             <div className="reply-to">
               <span>Reply to:</span>
-              <img src={replyingTo.avatar ? `${apiUrl}/${replyingTo.avatar}` : `${apiUrl}/uploads/avatars/default_avatar.jpeg`} alt="Avatar" className="avatar-small" />
+              <img src={replyingTo.avatar ? `${media}/${replyingTo.avatar}` : `${media}/avatars/default_avatar.jpeg`} alt="Avatar" className="avatar-small" />
               <span className="username">{replyingTo.username || "Anonymous"}</span>
             </div>
           )}
