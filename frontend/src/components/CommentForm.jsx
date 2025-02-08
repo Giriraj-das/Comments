@@ -173,7 +173,7 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
           {replyingTo && (
             <div className="reply-to">
               <span>Reply to:</span>
-              <img src={replyingTo.avatar ? {replyingTo.avatar} : `${media}/avatars/default_avatar.jpeg`} alt="Avatar" className="avatar-small" />
+              <img src={replyingTo.avatar ? replyingTo.avatar : `${media}/avatars/default_avatar.jpeg`} alt="Avatar" className="avatar-small" />
               <span className="username">{replyingTo.username || "Anonymous"}</span>
             </div>
           )}
