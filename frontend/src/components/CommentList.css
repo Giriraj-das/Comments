@@ -1,6 +1,6 @@
 .comment-list-container {
   padding: 20px;
-  max-width: 50%;
+  max-width: 70%;
   margin: 0 auto;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
@@ -44,4 +44,36 @@
   display: flex;
   justify-content: center;
   padding: 20px;
+}
+
+
+.comment-attachments {
+  margin-top: 10px;
+}
+
+.text-file-preview {
+  margin-top: 10px;
+}
+
+.text-file-preview a {
+  display: block;
+  color: #007bff;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.text-file-preview a:hover {
+  text-decoration: underline;
+}
+
+.text-preview-content {
+  background: #f8f9fa;
+  padding: 8px;
+  border-radius: 5px;
+  margin-top: 5px;
+  font-size: 14px;
+  color: #333;
+  max-height: 100px;
+  overflow: hidden;
+  transition: opacity 0.3s ease-in-out;
 }

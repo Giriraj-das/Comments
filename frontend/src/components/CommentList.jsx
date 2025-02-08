@@ -1,7 +1,9 @@
 import React, { useState, useEffect} from "react";
+import { motion } from "framer-motion";
 import axios from "axios";
 import DOMPurify from "dompurify";
 import CommentForm from "./CommentForm.jsx";
+import ShowImage from "./ShowImage.jsx"
 import ReplyButton from "./ReplyButton/ReplyButton.jsx";
 import "./CommentList.css";
 
@@ -32,6 +34,31 @@ function CommentList() {
 
     fetchComments();
   }, [sortBy, order]);
+
+  useEffect(() => {
+  comments.forEach((comment) => {
+    if (comment.file && /\.txt$/i.test(comment.file)) {
+      fetch(comment.file)
+        .then((response) => response.text())
+        .then((text) => {
+          const previewElement = document.querySelector(
+            `.text-preview-content[data-file="${comment.file}"]`
+          );
+          if (previewElement) {
+            previewElement.innerText = text.substring(0, 150) + "...";
+          }
+        })
+        .catch(() => {
+          const previewElement = document.querySelector(
+            `.text-preview-content[data-file="${comment.file}"]`
+          );
+          if (previewElement) {
+            previewElement.innerText = "Failed to load preview";
+          }
+        });
+    }
+  });
+}, [comments]);
 
   const handleSort = (field) => {
     if (sortBy === field) {
@@ -91,13 +118,39 @@ function CommentList() {
     return comments.map((comment) => (
       <div key={comment.id} className="comment-item" style={{ marginLeft: `${depth * 20}px` }}>
         <div className="comment-header">
-          <img src={comment.avatar ? `${comment.avatar}` : `${media}/avatars/default_avatar.jpeg`} alt="Avatar" className="avatar" />
+          <img src={comment.avatar ? `${apiUrl}${comment.avatar}` : `${media}/avatars/default_avatar.jpeg`} alt="Avatar" className="avatar" />
           <span className="username">{comment.username || "Anonymous"}</span>
           <span className="comment-date">{formatDate(comment.created_at)}</span>
         </div>
-        <div className="comment-body">
+        <motion.div
+          className="comment-body"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
           <p dangerouslySetInnerHTML={{ __html: sanitizeText(comment.text) }} />
-        </div>
+          {comment.file && (
+            <div className="comment-attachments">
+              {/\.(jpg|jpeg|png|gif)$/i.test(comment.file) && (
+                <ShowImage src={`${apiUrl}${comment.file}`} />
+              )}
+
+              {/\.txt$/i.test(comment.file) && (
+                <div
+                  className="text-file-preview"
+                >
+                  <a href={comment.file} target="blank" rel="noopener noreferrer">
+                    📄 Text file
+                  </a>
+                  <div className="text-preview-content" data-file={comment.file}>
+                    <p>Loading preview...</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </motion.div>
+
         <div className="comment-footer">
           <ReplyButton onClick={() => toggleCommentForm(comment.id)}>
             Reply
