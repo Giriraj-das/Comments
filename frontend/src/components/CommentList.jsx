@@ -118,7 +118,7 @@ function CommentList() {
     return comments.map((comment) => (
       <div key={comment.id} className="comment-item" style={{ marginLeft: `${depth * 20}px` }}>
         <div className="comment-header">
-          <img src={comment.avatar ? `${apiUrl}${comment.avatar}` : `${media}/avatars/default_avatar.jpeg`} alt="Avatar" className="avatar" />
+          <img src={comment.avatar ? {comment.avatar} : `${media}/avatars/default_avatar.jpeg`} alt="Avatar" className="avatar" />
           <span className="username">{comment.username || "Anonymous"}</span>
           <span className="comment-date">{formatDate(comment.created_at)}</span>
         </div>
