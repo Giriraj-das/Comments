@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { validateURL, resizeImage } from "./utils.js";
+import { resizeImage } from "./utils/resizeImage.js";
+import { validateTags } from "./utils/validateTags.js";
+import { validateURL } from "./utils/validateURL.js";
 import "./CommentForm.css";
 
 function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
@@ -9,6 +11,7 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
   const [homepage, setHomepage] = useState("");
   const [homepageError, setHomepageError] = useState("");
   const [text, setText] = useState("");
+  const [tagError, setTagError] = useState("");
   const [captcha, setCaptcha] = useState("");
   const [captchaKey, setCaptchaKey] = useState("");
   const [captchaError, setCaptchaError] = useState("");
@@ -76,6 +79,14 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
     }
   };
 
+  const handleTextChange = (e) => {
+    const newText = e.target.value;
+    setText(newText);
+
+    const error = validateTags(newText);
+    setTagError(error);
+  };
+
   const handleHomepageChange = (e) => {
     const value = e.target.value;
     setHomepage(value);
@@ -126,7 +137,7 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
     });
   };
 
-  const insertTag = (tag) => {
+  const insertTag = (open_tag, close_tag) => {
     const textarea = document.getElementById("text"); // Get textarea
     const start = textarea.selectionStart; // Cursor start position
     const end = textarea.selectionEnd; // Cursor end position
@@ -135,12 +146,12 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
     const afterText = text.slice(end); // Text after selection
 
     const newText = selectedText
-      ? `${beforeText}<${tag}>${selectedText}</${tag}>${afterText}`
-      : `${beforeText}<${tag}></${tag}>${afterText}`;
+      ? `${beforeText}<${open_tag}>${selectedText}</${close_tag}>${afterText}`
+      : `${beforeText}<${open_tag}></${close_tag}>${afterText}`;
 
     const cursorPosition = selectedText
-      ? start + `<${tag}>`.length + selectedText.length + `</${tag}>`.length
-      : start + `<${tag}>`.length;
+      ? start + `<${open_tag}>`.length + selectedText.length + `</${close_tag}>`.length
+      : start + `<${open_tag}>`.length;
 
     setText(newText);
 
@@ -167,17 +178,18 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
             </div>
           )}
           <div className="toolbar tag-buttons">
-            <button type="button" onClick={() => insertTag("i")}>Italic</button>
-            <button type="button" onClick={() => insertTag("strong")}>Bold</button>
-            <button type="button" onClick={() => insertTag("code")}>Code</button>
-            <button type="button" onClick={() => insertTag("a")}>Link</button>
+            <button type="button" onClick={() => insertTag("i", "i")}>Italic</button>
+            <button type="button" onClick={() => insertTag("strong", "strong")}>Bold</button>
+            <button type="button" onClick={() => insertTag("code", "code")}>Code</button>
+            <button type="button" onClick={() => insertTag("a href=\"\" title=\"\"", "a")}>Link</button>
             <label className="upload-button">
               File
               <input type="file" accept=".jpg,.jpeg,.png,.gif,.txt" onChange={handleFileChange} />
             </label>
           </div>
 
-          <textarea id="text" value={text} onChange={(e) => setText(e.target.value)} required ref={textAreaRef} />
+          <textarea id="text" value={text} onChange={handleTextChange} required ref={textAreaRef} />
+          {tagError && <p className="error-message">{tagError}</p>}
 
           <div className="form-actions">
             <button type="submit">Submit Comment</button>
