@@ -132,7 +132,7 @@ function CommentList() {
           {comment.file && (
             <div className="comment-attachments">
               {/\.(jpg|jpeg|png|gif)$/i.test(comment.file) && (
-                <ShowImage src={`${apiUrl}${comment.file}`} />
+                <ShowImage src={comment.file} />
               )}
 
               {/\.txt$/i.test(comment.file) && (
