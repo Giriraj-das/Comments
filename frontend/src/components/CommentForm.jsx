@@ -115,8 +115,14 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
         alert("Text file size must not exceed 100KB.");
         return;
       }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setPreviewUrl(event.target.result); // Сохраняем текст в `previewUrl`
+      };
+      reader.readAsText(file);
+
       setFile(file);
-      setPreviewUrl(null);
     } else {
       alert("Only JPG, PNG, GIF, or TXT files are allowed.");
     }
@@ -197,9 +203,13 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
           </div>
         </div>
 
-        {previewUrl && (
+        {file && (
           <div className="file-preview">
-            <img src={previewUrl} alt="Preview" />
+            {file.type === "text/plain" ? (
+              <pre className="text-preview-content">{previewUrl}</pre>
+            ) : (
+              <img src={previewUrl} alt="Preview" />
+            )}
           </div>
         )}
 
