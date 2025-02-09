@@ -43,18 +43,18 @@ class CommentAPIView(APIView):
 
             # Check CAPTCHA
             if not captcha_key or not captcha_value:
-                logger.error("CAPTCHA is missing in the request")
+                logger.error('CAPTCHA is missing in the request')
                 return Response({'error': 'CAPTCHA is required'}, status=400)
             try:
                 captcha = CaptchaStore.objects.get(hashkey=captcha_key)
                 if captcha.expiration < now():
-                    logger.error(f"Expired CAPTCHA: {captcha_key}")
+                    logger.error(f'Expired CAPTCHA: {captcha_key}')
                     return Response({'error': 'CAPTCHA expired'}, status=400)
                 if captcha.response != captcha_value.lower():
-                    logger.error(f"Invalid CAPTCHA: {captcha_key}")
+                    logger.error(f'Invalid CAPTCHA: {captcha_key}')
                     return Response({'error': 'Invalid CAPTCHA'}, status=400)
             except CaptchaStore.DoesNotExist:
-                logger.error(f"Invalid CAPTCHA key: {captcha_key}")
+                logger.error(f'Invalid CAPTCHA key: {captcha_key}')
                 return Response({'error': 'Invalid CAPTCHA key'}, status=400)
 
             # If CAPTCHA valid, save a comment
@@ -63,8 +63,8 @@ class CommentAPIView(APIView):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-            logger.error(f"Invalid comment data: {serializer.errors}")
+            logger.error(f'Invalid comment data: {serializer.errors}')
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            logger.exception(f"Unexpected error in CommentAPIView: {e}")
+            logger.exception(f'Unexpected error in CommentAPIView: {e}')
             return Response({'error': 'Internal Server Error'}, status=500)

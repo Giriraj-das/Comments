@@ -2,15 +2,15 @@ from .base import *
 
 DEBUG = True
 
-INSTALLED_APPS += ["corsheaders"]
+INSTALLED_APPS += ['corsheaders']
 
 MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+    'http://localhost:5173',
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
-    "content-type",
-    "authorization",
+    'content-type',
+    'authorization',
 ]
