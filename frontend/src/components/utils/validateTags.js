@@ -1,5 +1,5 @@
 export const validateTags = (inputText) => {
-  const allowedTags = ["a", "code", "i", "strong"]; // Разрешенные теги
+  const allowedTags = ["a", "code", "i", "strong"];
   const tagStack = [];
   const tagRegex = /<\/?([a-z]+)(?:\s+[^>]*)?>/g;
   let match;
@@ -8,25 +8,22 @@ export const validateTags = (inputText) => {
     const tag = match[1];
 
     if (!allowedTags.includes(tag)) {
-      return `Ошибка: Тег <${tag}> не разрешен. Используйте только ${allowedTags.join(", ")}.`;
+      return `Error: tag <${tag}> not allowed. Use oly ${allowedTags.join(", ")}.`;
     }
 
     if (!match[0].startsWith("</")) {
-      // Открывающий тег
       tagStack.push(tag);
     } else {
-      // Закрывающий тег
       if (tagStack.length === 0 || tagStack[tagStack.length - 1] !== tag) {
-        return `Ошибка: Тег </${tag}> не закрывает соответствующий открывающий тег.`;
+        return `Error: tag </${tag}> unclosed.`;
       }
       tagStack.pop();
     }
   }
 
-  // Если остались незакрытые теги
   if (tagStack.length > 0) {
-    return `Ошибка: Тег <${tagStack[tagStack.length - 1]}> не закрыт.`;
+    return `Error: tag <${tagStack[tagStack.length - 1]}> unclosed.`;
   }
 
-  return ""; // Ошибок нет
+  return "";
 };
