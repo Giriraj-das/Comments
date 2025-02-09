@@ -118,7 +118,7 @@ function CommentForm({ parentId = null, onCommentAdded, onClose, replyingTo }) {
 
       const reader = new FileReader();
       reader.onload = (event) => {
-        setPreviewUrl(event.target.result); // Сохраняем текст в `previewUrl`
+        setPreviewUrl(event.target.result);
       };
       reader.readAsText(file);
 
